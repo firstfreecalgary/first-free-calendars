@@ -668,11 +668,12 @@
         url:       'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics'
       },
       {
-        id:        'rentals',
-        name:      'Rentals',
-        color:     '#ef4444',
-        localPath: 'calendars/rentals.ics',
-        url:       'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
+        id:            'rentals',
+        name:          'Rentals',
+        color:         '#ef4444',
+        titleOverride: 'Rental',
+        localPath:     'calendars/rentals.ics',
+        url:           'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
       }
     ];
 
@@ -704,7 +705,7 @@
           const evt = item || ev;
           return {
             id:    (ev.uid || Math.random()) + '-' + startDate.toUnixTime(),
-            title: evt.summary || '(No title)',
+            title: cal.titleOverride || evt.summary || '(No title)',
             start: isAllDay ? startDate.toString().slice(0, 10) : startDate.toJSDate(),
             end:   endDate  ? (isAllDay ? endDate.toString().slice(0, 10) : endDate.toJSDate()) : null,
             allDay: isAllDay,
@@ -960,12 +961,14 @@
         headerToolbar: {
           left:   'prev,next today',
           center: 'title',
-          right:  'dayGridMonth,listMonth'
+          right:  'dayGridMonth,timeGridDay,listMonth'
         },
-        buttonText:       { today: 'Today', month: 'Month', list: 'List' },
+        buttonText:       { today: 'Today', month: 'Month', day: 'Day', list: 'List' },
         height:           'auto',
         firstDay:         0,
         initialView:      window.innerWidth < 640 ? 'listMonth' : 'dayGridMonth',
+        navLinks:         true,
+        dateClick:        info => fcCalendar.changeView('timeGridDay', info.date),
         displayEventTime: false,
         views: {
           listMonth: { displayEventTime: true }
