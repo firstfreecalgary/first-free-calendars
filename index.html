@@ -974,7 +974,9 @@
         buttonText:       { today: 'Today', month: 'Month', list: 'List' },
         height:           'auto',
         firstDay:         0,
-eventClick:       openModal,
+        initialView:      window.innerWidth < 640 ? 'listMonth' : 'dayGridMonth',
+        displayEventTime: false,
+        eventClick:       openModal,
         noEventsContent:  'No events to display'
       });
 
