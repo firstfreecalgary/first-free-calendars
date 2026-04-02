@@ -564,16 +564,19 @@
       border-radius: 8px;
       font-size: .75rem;
       font-weight: 500;
+      font-family: 'Inter', sans-serif;
       text-decoration: none;
       transition: opacity .15s;
       white-space: nowrap;
+      cursor: pointer;
+      border: none;
     }
 
-    .sub-btn:hover { opacity: .85; }
+    .sub-btn:hover { opacity: .75; }
     .sub-btn-primary { color: #fff; }
     .sub-btn-secondary {
       background: var(--surface2);
-      color: var(--muted);
+      color: var(--text);
       border: 1px solid var(--border);
     }
 
@@ -876,7 +879,7 @@
           '</div>' +
           '<div class="subscribe-actions">' +
             (isApple ? '<a href="' + webcal + '" class="sub-btn sub-btn-primary" style="background:' + cal.color + '">Subscribe</a>' : '') +
-            '<button class="sub-btn sub-btn-secondary" onclick="navigator.clipboard.writeText(\'' + cal.url + '\').then(() => { this.textContent=\'Copied!\'; setTimeout(() => this.textContent=\'Copy link\', 2000); })">Copy link</button>' +
+            '<button class="sub-btn ' + (isApple ? 'sub-btn-secondary' : 'sub-btn-primary') + '" ' + (!isApple ? 'style="background:' + cal.color + '"' : '') + ' onclick="navigator.clipboard.writeText(\'' + cal.url + '\').then(() => { this.textContent=\'Copied!\'; setTimeout(() => this.textContent=\'Copy link\', 2000); })">Copy link</button>' +
           '</div>';
         list.appendChild(row);
       });
