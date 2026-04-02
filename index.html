@@ -14,13 +14,46 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0f1117;
-      --surface:  #1a1d27;
-      --surface2: #22263a;
-      --border:   rgba(255,255,255,.07);
-      --text:     #f0f0f0;
-      --muted:    #6b7280;
-      --radius:   14px;
+      --bg:           #0f1117;
+      --surface:      #1a1d27;
+      --surface2:     #22263a;
+      --border:       rgba(255,255,255,.07);
+      --text:         #f0f0f0;
+      --muted:        #6b7280;
+      --accent-text:  #818cf8;
+      --radius:       14px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg:          #f5f5f7;
+        --surface:     #ffffff;
+        --surface2:    #f0f0f5;
+        --border:      rgba(0,0,0,.08);
+        --text:        #111827;
+        --muted:       #6b7280;
+        --accent-text: #6366f1;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg:          #f5f5f7;
+      --surface:     #ffffff;
+      --surface2:    #f0f0f5;
+      --border:      rgba(0,0,0,.08);
+      --text:        #111827;
+      --muted:       #6b7280;
+      --accent-text: #6366f1;
+    }
+
+    :root[data-theme="dark"] {
+      --bg:          #0f1117;
+      --surface:     #1a1d27;
+      --surface2:    #22263a;
+      --border:      rgba(255,255,255,.07);
+      --text:        #f0f0f0;
+      --muted:       #6b7280;
+      --accent-text: #818cf8;
     }
 
     html, body {
@@ -79,7 +112,7 @@
       padding: .25rem .6rem;
       border-radius: 20px;
       background: rgba(99,102,241,.12);
-      color: #818cf8;
+      color: var(--accent-text);
       border: 1px solid rgba(99,102,241,.22);
       display: flex;
       align-items: center;
@@ -98,6 +131,32 @@
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: .35; }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    #theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+    }
+
+    #theme-toggle:hover {
+      background: var(--border);
+      color: var(--text);
     }
 
     /* ── Status bar ── */
@@ -205,7 +264,7 @@
 
     .fc .fc-button:hover {
       background:   rgba(99,102,241,.15) !important;
-      color:        #818cf8 !important;
+      color:        var(--accent-text) !important;
       border-color: rgba(99,102,241,.3) !important;
     }
 
@@ -270,7 +329,7 @@
     .fc .fc-list-day-side-text {
       font-size: .78rem !important;
       font-weight: 600 !important;
-      color: #818cf8 !important;
+      color: var(--accent-text) !important;
       text-decoration: none !important;
     }
 
@@ -417,15 +476,14 @@
 
   <div class="topbar">
     <div class="topbar-left">
-      <div class="logo-dot">&#10022;</div>
-      <div>
-        <div class="topbar-name">FEFC Calgary</div>
-        <div class="topbar-sub">Ministry Calendar</div>
-      </div>
+      <div class="topbar-name">First Free Calendars</div>
     </div>
-    <div class="sync-badge">
-      <div class="sync-dot"></div>
-      <span>Live sync</span>
+    <div class="topbar-right">
+      <div class="sync-badge">
+        <div class="sync-dot"></div>
+        <span>Live sync</span>
+      </div>
+      <button id="theme-toggle" aria-label="Toggle theme"></button>
     </div>
   </div>
 
@@ -451,22 +509,22 @@
     // ─── Config ────────────────────────────────────────────────────────────────
     const CALENDARS = [
       {
+        id:    'public',
+        name:  'Public Events',
+        color: '#6366f1',
+        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics'
+      },
+      {
         id:    'ministerial',
         name:  'Ministerial',
-        color: '#6366f1',
+        color: '#10b981',
         url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics'
       },
       {
         id:    'rentals',
         name:  'Rentals',
-        color: '#f59e0b',
+        color: '#ef4444',
         url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
-      },
-      {
-        id:    'public',
-        name:  'Public Events',
-        color: '#10b981',
-        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics'
       }
     ];
 
@@ -478,8 +536,8 @@
     const EXPAND_TO   = ICAL.Time.fromJSDate(new Date(new Date().getFullYear() + 2, 11, 31));
 
     // ─── State ─────────────────────────────────────────────────────────────────
-    const visible   = new Set(CALENDARS.map(c => c.id));
-    let   allEvents = [];   // Array of { calId, fcEvent }
+    const visible      = new Set(CALENDARS.map(c => c.id));
+    let   calendarData = {};  // calId -> [fcEvent]
     let   fcCalendar;
 
     // ─── ICS Parsing ───────────────────────────────────────────────────────────
@@ -501,14 +559,11 @@
           const isAllDay = startDate.isDate;
           const evt = item || ev;
           return {
-            id:              (ev.uid || Math.random()) + '-' + startDate.toUnixTime(),
-            title:           evt.summary || '(No title)',
-            start:           isAllDay ? startDate.toString().slice(0, 10) : startDate.toJSDate(),
-            end:             endDate  ? (isAllDay ? endDate.toString().slice(0, 10) : endDate.toJSDate()) : null,
-            allDay:          isAllDay,
-            backgroundColor: cal.color,
-            borderColor:     'transparent',
-            textColor:       '#fff',
+            id:    (ev.uid || Math.random()) + '-' + startDate.toUnixTime(),
+            title: evt.summary || '(No title)',
+            start: isAllDay ? startDate.toString().slice(0, 10) : startDate.toJSDate(),
+            end:   endDate  ? (isAllDay ? endDate.toString().slice(0, 10) : endDate.toJSDate()) : null,
+            allDay: isAllDay,
             extendedProps: {
               calId:       cal.id,
               description: evt.description || '',
@@ -558,12 +613,12 @@
       setStatus('Fetching calendars\u2026', 'loading');
 
       const results = await Promise.allSettled(CALENDARS.map(fetchCalendar));
-      allEvents = [];
+      calendarData = {};
       const failed = [];
 
       results.forEach((r, i) => {
         if (r.status === 'fulfilled') {
-          r.value.forEach(ev => allEvents.push({ calId: CALENDARS[i].id, fcEvent: ev }));
+          calendarData[CALENDARS[i].id] = r.value;
         } else {
           failed.push(CALENDARS[i].name);
           console.error('Failed to load', CALENDARS[i].name, r.reason);
@@ -581,10 +636,17 @@
 
     function refreshEvents() {
       if (!fcCalendar) return;
-      fcCalendar.removeAllEvents();
-      fcCalendar.addEventSource(
-        allEvents.filter(e => visible.has(e.calId)).map(e => e.fcEvent)
-      );
+      fcCalendar.getEventSources().forEach(s => s.remove());
+      CALENDARS.forEach(cal => {
+        if (visible.has(cal.id) && calendarData[cal.id]) {
+          fcCalendar.addEventSource({
+            id:        cal.id,
+            color:     cal.color,
+            textColor: '#fff',
+            events:    calendarData[cal.id]
+          });
+        }
+      });
     }
 
     // ─── Status helpers ────────────────────────────────────────────────────────
@@ -682,8 +744,37 @@
       });
     }
 
+    // ─── Theme ─────────────────────────────────────────────────────────────────
+    const ICON_SUN  = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+    const ICON_MOON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+    function getEffectiveTheme() {
+      const stored = document.documentElement.getAttribute('data-theme');
+      if (stored) return stored;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.innerHTML = theme === 'dark' ? ICON_SUN : ICON_MOON;
+    }
+
+    // Restore saved preference immediately (before DOMContentLoaded) to avoid flash
+    (function () {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+
     // ─── Init ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+      // Set initial theme button icon
+      applyTheme(getEffectiveTheme());
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        applyTheme(getEffectiveTheme() === 'dark' ? 'light' : 'dark');
+      });
+
       buildToggles();
 
       fcCalendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
@@ -696,7 +787,7 @@
         buttonText:       { today: 'Today', month: 'Month', list: 'List' },
         height:           'auto',
         firstDay:         0,
-        eventClick:       openModal,
+eventClick:       openModal,
         noEventsContent:  'No events to display'
       });
 
