@@ -654,29 +654,28 @@
     // ─── Config ────────────────────────────────────────────────────────────────
     const CALENDARS = [
       {
-        id:    'public',
-        name:  'Public Events',
-        color: '#6366f1',
-        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics'
+        id:        'public',
+        name:      'Public Events',
+        color:     '#6366f1',
+        localPath: 'calendars/public.ics',
+        url:       'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics'
       },
       {
-        id:    'ministerial',
-        name:  'Ministerial',
-        color: '#10b981',
-        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics'
+        id:        'ministerial',
+        name:      'Ministerial',
+        color:     '#10b981',
+        localPath: 'calendars/ministerial.ics',
+        url:       'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics'
       },
       {
-        id:    'rentals',
-        name:  'Rentals',
-        color: '#ef4444',
-        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
+        id:        'rentals',
+        name:      'Rentals',
+        color:     '#ef4444',
+        localPath: 'calendars/rentals.ics',
+        url:       'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
       }
     ];
 
-    const CORS_PROXIES = [
-      url => 'https://corsproxy.io/?' + encodeURIComponent(url),
-      url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
-    ];
     const EXPAND_FROM = ICAL.Time.fromJSDate(new Date(new Date().getFullYear() - 1, 0, 1));
     const EXPAND_TO   = ICAL.Time.fromJSDate(new Date(new Date().getFullYear() + 2, 11, 31));
 
@@ -741,17 +740,9 @@
 
     // ─── Fetch ─────────────────────────────────────────────────────────────────
     async function fetchCalendar(cal) {
-      let lastErr;
-      for (const proxy of CORS_PROXIES) {
-        try {
-          const res = await fetch(proxy(cal.url));
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return parseICS(await res.text(), cal);
-        } catch (e) {
-          lastErr = e;
-        }
-      }
-      throw lastErr;
+      const res = await fetch(cal.localPath + '?_=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return parseICS(await res.text(), cal);
     }
 
     async function loadAll() {

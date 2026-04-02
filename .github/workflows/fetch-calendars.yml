@@ -1,0 +1,33 @@
+name: Fetch Calendars
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # every hour
+  workflow_dispatch:        # allow manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch ICS files
+        run: |
+          mkdir -p calendars
+          curl -fsSL -o calendars/public.ics \
+            "https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics"
+          curl -fsSL -o calendars/ministerial.ics \
+            "https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics"
+          curl -fsSL -o calendars/rentals.ics \
+            "https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add calendars/
+          git diff --staged --quiet || git commit -m "chore: update calendar ICS files"
+          git push
