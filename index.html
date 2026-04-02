@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEFC Calgary — Calendar</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.11/index.global.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.5.0/ical.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #22263a;
+      --border:   rgba(255,255,255,.07);
+      --text:     #f0f0f0;
+      --muted:    #6b7280;
+      --radius:   14px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .logo-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #6366f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .topbar-name {
+      font-size: .92rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .topbar-sub {
+      font-size: .73rem;
+      color: var(--muted);
+    }
+
+    .sync-badge {
+      font-size: .7rem;
+      padding: .25rem .6rem;
+      border-radius: 20px;
+      background: rgba(99,102,241,.12);
+      color: #818cf8;
+      border: 1px solid rgba(99,102,241,.22);
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      white-space: nowrap;
+    }
+
+    .sync-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .35; }
+    }
+
+    /* ── Status bar ── */
+    #status {
+      text-align: center;
+      padding: .6rem 1rem;
+      font-size: .8rem;
+      display: none;
+    }
+
+    #status.loading { display: block; color: var(--muted); }
+
+    #status.error {
+      display: block;
+      background: rgba(239,68,68,.1);
+      color: #fca5a5;
+      border-bottom: 1px solid rgba(239,68,68,.2);
+    }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    /* ── Toggles ── */
+    .toggles {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: .78rem;
+      font-weight: 500;
+      transition: background .15s, color .15s, opacity .15s;
+      color: #fff;
+    }
+
+    .toggle-btn.inactive {
+      background: transparent !important;
+      opacity: .45;
+    }
+
+    .toggle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.7);
+      flex-shrink: 0;
+    }
+
+    /* ── FullCalendar overrides ── */
+    .fc {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      --fc-border-color:              var(--border);
+      --fc-page-bg-color:             var(--surface);
+      --fc-neutral-bg-color:          var(--surface2);
+      --fc-list-event-hover-bg-color: var(--surface2);
+      --fc-today-bg-color:            rgba(99,102,241,.06);
+      --fc-event-border-color:        transparent;
+    }
+
+    .fc .fc-toolbar {
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .fc .fc-toolbar-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.02em;
+    }
+
+    .fc .fc-button {
+      background:   var(--surface2) !important;
+      border:       1px solid var(--border) !important;
+      color:        var(--muted) !important;
+      font-family:  'Inter', sans-serif !important;
+      font-size:    .73rem !important;
+      font-weight:  500 !important;
+      padding:      .33rem .65rem !important;
+      border-radius: 8px !important;
+      transition:   all .15s !important;
+      box-shadow:   none !important;
+      text-transform: none !important;
+    }
+
+    .fc .fc-button:hover {
+      background:   rgba(99,102,241,.15) !important;
+      color:        #818cf8 !important;
+      border-color: rgba(99,102,241,.3) !important;
+    }
+
+    .fc .fc-button-active,
+    .fc .fc-button-primary:not(:disabled).fc-button-active {
+      background:   #6366f1 !important;
+      color:        #fff !important;
+      border-color: #6366f1 !important;
+    }
+
+    .fc .fc-button:disabled { opacity: .4 !important; }
+
+    .fc .fc-col-header-cell {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border) !important;
+      padding: .5rem 0 !important;
+    }
+
+    .fc .fc-col-header-cell-cushion {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-decoration: none !important;
+    }
+
+    .fc .fc-daygrid-day-number {
+      font-size: .78rem;
+      color: var(--muted);
+      padding: .4rem .55rem;
+      text-decoration: none !important;
+    }
+
+    .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+      background: #6366f1;
+      color: #fff;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .fc-event {
+      border-radius: 5px !important;
+      border: none !important;
+      font-size: .71rem !important;
+      font-weight: 500 !important;
+      padding: 2px 6px !important;
+      cursor: pointer !important;
+      transition: opacity .15s !important;
+    }
+
+    .fc-event:hover { opacity: .8 !important; }
+
+    .fc .fc-list { border: none !important; }
+
+    .fc .fc-list-day-cushion {
+      background: var(--surface2) !important;
+      padding: .5rem 1rem !important;
+    }
+
+    .fc .fc-list-day-text,
+    .fc .fc-list-day-side-text {
+      font-size: .78rem !important;
+      font-weight: 600 !important;
+      color: #818cf8 !important;
+      text-decoration: none !important;
+    }
+
+    .fc .fc-list-event td {
+      border-color: var(--border) !important;
+      padding: .55rem 1rem !important;
+      font-size: .83rem !important;
+      color: var(--text) !important;
+    }
+
+    .fc .fc-list-event:hover td { background: var(--surface2) !important; }
+
+    .fc .fc-list-empty {
+      background: var(--surface) !important;
+      color: var(--muted) !important;
+      font-size: .85rem !important;
+    }
+
+    /* ── Modal ── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    #modal-overlay.open { display: flex; }
+
+    #modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+      overflow: hidden;
+      animation: slideUp .2s cubic-bezier(.16,1,.3,1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.25rem 1rem;
+      position: relative;
+    }
+
+    .modal-cal-label {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(255,255,255,.65);
+      margin-bottom: .3rem;
+    }
+
+    #modal-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+      padding-right: 2rem;
+    }
+
+    #modal-close {
+      position: absolute;
+      top: .9rem;
+      right: .9rem;
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: .78rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+
+    #modal-close:hover { background: rgba(255,255,255,.28); }
+
+    .modal-body { padding: 1rem 1.25rem 1.25rem; }
+
+    .modal-row {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      padding: .55rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-row:last-child { border-bottom: none; }
+
+    .modal-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .modal-info { flex: 1; }
+
+    .modal-info-label {
+      font-size: .66rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: .15rem;
+    }
+
+    .modal-info-value {
+      font-size: .85rem;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .main     { padding: .75rem .75rem 2rem; }
+      .topbar   { padding: .75rem 1rem; }
+      .sync-badge span { display: none; }
+      .fc .fc-toolbar { padding: .75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-dot">&#10022;</div>
+      <div>
+        <div class="topbar-name">FEFC Calgary</div>
+        <div class="topbar-sub">Ministry Calendar</div>
+      </div>
+    </div>
+    <div class="sync-badge">
+      <div class="sync-dot"></div>
+      <span>Live sync</span>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <div class="main">
+    <div class="toggles" id="toggles"></div>
+    <div id="calendar"></div>
+  </div>
+
+  <div id="modal-overlay" role="dialog" aria-modal="true">
+    <div id="modal">
+      <div class="modal-header" id="modal-header">
+        <div class="modal-cal-label" id="modal-cal-label"></div>
+        <div id="modal-title"></div>
+        <button id="modal-close" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Config ────────────────────────────────────────────────────────────────
+    const CALENDARS = [
+      {
+        id:    'ministerial',
+        name:  'Ministerial',
+        color: '#6366f1',
+        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/c9a0306ed2b846b38bf6111b9a467b3f11924704179160873012/calendar.ics'
+      },
+      {
+        id:    'rentals',
+        name:  'Rentals',
+        color: '#f59e0b',
+        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/e7bb0be2709c4af5861301a50735b78c13308200961684392270/calendar.ics'
+      },
+      {
+        id:    'public',
+        name:  'Public Events',
+        color: '#10b981',
+        url:   'https://outlook.office365.com/owa/calendar/5b6e6c2fedab4ca0a90fced22273b7d8@freechurchcalgary.com/59cd8b6c9d4649dfb83bb379f09cbc3314956804182017763219/calendar.ics'
+      }
+    ];
+
+    const CORS_PROXIES = [
+      url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+      url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
+    ];
+    const EXPAND_FROM = ICAL.Time.fromJSDate(new Date(new Date().getFullYear() - 1, 0, 1));
+    const EXPAND_TO   = ICAL.Time.fromJSDate(new Date(new Date().getFullYear() + 2, 11, 31));
+
+    // ─── State ─────────────────────────────────────────────────────────────────
+    const visible   = new Set(CALENDARS.map(c => c.id));
+    let   allEvents = [];   // Array of { calId, fcEvent }
+    let   fcCalendar;
+
+    // ─── ICS Parsing ───────────────────────────────────────────────────────────
+    function parseICS(text, cal) {
+      const events = [];
+      let comp;
+      try {
+        comp = new ICAL.Component(ICAL.parse(text));
+      } catch (e) {
+        console.error('ICS parse error for', cal.id, e);
+        return events;
+      }
+
+      comp.getAllSubcomponents('vevent').forEach(vevent => {
+        const ev = new ICAL.Event(vevent);
+        if (!ev.startDate) return;
+
+        const toFC = (startDate, endDate, item) => {
+          const isAllDay = startDate.isDate;
+          const evt = item || ev;
+          return {
+            id:              (ev.uid || Math.random()) + '-' + startDate.toUnixTime(),
+            title:           evt.summary || '(No title)',
+            start:           isAllDay ? startDate.toString().slice(0, 10) : startDate.toJSDate(),
+            end:             endDate  ? (isAllDay ? endDate.toString().slice(0, 10) : endDate.toJSDate()) : null,
+            allDay:          isAllDay,
+            backgroundColor: cal.color,
+            borderColor:     'transparent',
+            textColor:       '#fff',
+            extendedProps: {
+              calId:       cal.id,
+              description: evt.description || '',
+              location:    evt.location    || ''
+            }
+          };
+        };
+
+        if (ev.isRecurring()) {
+          try {
+            const expand = new ICAL.RecurExpansion({ component: vevent, dtstart: ev.startDate });
+            let next, count = 0;
+            while ((next = expand.next()) && count++ < 1000) {
+              if (next.compare(EXPAND_TO)   >  0) break;
+              if (next.compare(EXPAND_FROM) <  0) continue;
+              const d = ev.getOccurrenceDetails(next);
+              events.push(toFC(d.startDate, d.endDate, d.item));
+            }
+          } catch (e) {
+            // Fallback: just add the base event
+            events.push(toFC(ev.startDate, ev.endDate, null));
+          }
+        } else {
+          events.push(toFC(ev.startDate, ev.endDate, null));
+        }
+      });
+
+      return events;
+    }
+
+    // ─── Fetch ─────────────────────────────────────────────────────────────────
+    async function fetchCalendar(cal) {
+      let lastErr;
+      for (const proxy of CORS_PROXIES) {
+        try {
+          const res = await fetch(proxy(cal.url));
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return parseICS(await res.text(), cal);
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      throw lastErr;
+    }
+
+    async function loadAll() {
+      setStatus('Fetching calendars\u2026', 'loading');
+
+      const results = await Promise.allSettled(CALENDARS.map(fetchCalendar));
+      allEvents = [];
+      const failed = [];
+
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          r.value.forEach(ev => allEvents.push({ calId: CALENDARS[i].id, fcEvent: ev }));
+        } else {
+          failed.push(CALENDARS[i].name);
+          console.error('Failed to load', CALENDARS[i].name, r.reason);
+        }
+      });
+
+      if (failed.length) {
+        setStatus('Could not load: ' + failed.join(', '), 'error');
+      } else {
+        hideStatus();
+      }
+
+      refreshEvents();
+    }
+
+    function refreshEvents() {
+      if (!fcCalendar) return;
+      fcCalendar.removeAllEvents();
+      fcCalendar.addEventSource(
+        allEvents.filter(e => visible.has(e.calId)).map(e => e.fcEvent)
+      );
+    }
+
+    // ─── Status helpers ────────────────────────────────────────────────────────
+    const statusEl = document.getElementById('status');
+    function setStatus(msg, type) {
+      statusEl.textContent = msg;
+      statusEl.className   = type;
+      statusEl.style.display = '';
+    }
+    function hideStatus() {
+      statusEl.style.display = 'none';
+      statusEl.className = '';
+    }
+
+    // ─── Modal ─────────────────────────────────────────────────────────────────
+    const ICON_CLOCK    = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    const ICON_LOCATION = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const ICON_NOTE     = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+
+    function formatDateRange(start, end, allDay) {
+      const dateOpts = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      const timeOpts = { hour: 'numeric', minute: '2-digit' };
+      if (allDay) return start.toLocaleDateString('en-CA', dateOpts);
+      const date = start.toLocaleDateString('en-CA', dateOpts);
+      const t1   = start.toLocaleTimeString('en-CA', timeOpts);
+      const t2   = end ? end.toLocaleTimeString('en-CA', timeOpts) : null;
+      return t2 ? date + '  \u00b7  ' + t1 + ' \u2013 ' + t2
+                : date + '  \u00b7  ' + t1;
+    }
+
+    function openModal(info) {
+      const { title, start, end, allDay, extendedProps } = info.event;
+      const cal = CALENDARS.find(c => c.id === extendedProps.calId);
+
+      document.getElementById('modal-header').style.background = cal.color;
+      document.getElementById('modal-cal-label').textContent   = cal.name;
+      document.getElementById('modal-title').textContent       = title;
+
+      const body = document.getElementById('modal-body');
+      body.innerHTML = '';
+
+      const rows = [
+        { icon: ICON_CLOCK,    label: 'When',        value: formatDateRange(start, end, allDay) },
+        extendedProps.location    ? { icon: ICON_LOCATION, label: 'Location',    value: extendedProps.location    } : null,
+        extendedProps.description ? { icon: ICON_NOTE,     label: 'Description', value: extendedProps.description } : null
+      ].filter(Boolean);
+
+      rows.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'modal-row';
+        row.innerHTML =
+          '<div class="modal-icon">' + r.icon + '</div>' +
+          '<div class="modal-info">' +
+            '<div class="modal-info-label">' + r.label + '</div>' +
+            '<div class="modal-info-value">' + r.value + '</div>' +
+          '</div>';
+        body.appendChild(row);
+      });
+
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    // ─── Toggles ───────────────────────────────────────────────────────────────
+    function buildToggles() {
+      const container = document.getElementById('toggles');
+      CALENDARS.forEach(cal => {
+        const btn = document.createElement('button');
+        btn.className           = 'toggle-btn active';
+        btn.dataset.calId       = cal.id;
+        btn.style.borderColor   = cal.color;
+        btn.style.background    = cal.color;
+        btn.innerHTML =
+          '<span class="toggle-dot"></span>' + cal.name;
+
+        btn.addEventListener('click', () => {
+          if (visible.has(cal.id)) {
+            visible.delete(cal.id);
+            btn.classList.add('inactive');
+            btn.style.background = 'transparent';
+            btn.style.color      = cal.color;
+          } else {
+            visible.add(cal.id);
+            btn.classList.remove('inactive');
+            btn.style.background = cal.color;
+            btn.style.color      = '#fff';
+          }
+          refreshEvents();
+        });
+
+        container.appendChild(btn);
+      });
+    }
+
+    // ─── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      buildToggles();
+
+      fcCalendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left:   'prev,next today',
+          center: 'title',
+          right:  'dayGridMonth,listMonth'
+        },
+        buttonText:       { today: 'Today', month: 'Month', list: 'List' },
+        height:           'auto',
+        firstDay:         0,
+        eventClick:       openModal,
+        noEventsContent:  'No events to display'
+      });
+
+      fcCalendar.render();
+      loadAll();
+
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-overlay').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+      });
+    });
+  </script>
+
+</body>
+</html>
