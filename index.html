@@ -178,9 +178,8 @@
 
     /* ── Main layout ── */
     .main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 1.5rem 1.25rem 3rem;
+      flex: 1;
+      min-width: 0;
     }
 
     /* ── Toggles ── */
@@ -344,34 +343,16 @@
       text-decoration: none !important;
     }
 
-    .fc .fc-list-event {
-      display: flex !important;
-      align-items: center;
-    }
-
-    .fc .fc-list-event > td {
-      display: block !important;
+    .fc .fc-list-event td {
       border-color: var(--border) !important;
+      padding: .55rem 1rem !important;
       font-size: .83rem !important;
       color: var(--text) !important;
     }
 
-    .fc .fc-list-event-graphic {
-      order: 1;
-      padding: .55rem .5rem .55rem 1rem !important;
-    }
-
     .fc .fc-list-event-time {
-      order: 2;
-      padding: .55rem .75rem .55rem 0 !important;
       white-space: nowrap;
       color: var(--muted) !important;
-    }
-
-    .fc .fc-list-event-title {
-      order: 3;
-      flex: 1;
-      padding: .55rem 1rem .55rem 0 !important;
     }
 
     .fc .fc-list-event:hover td { background: var(--surface2) !important; }
@@ -619,19 +600,205 @@
 
     .modal-subscribe a:hover { text-decoration: underline; }
 
+    /* ── Hamburger button ── */
+    #hamburger {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Drawer overlay ── */
+    #drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+    }
+
+    #drawer-overlay.open { display: block; }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      align-items: flex-start;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      gap: 1.5rem;
+    }
+
+    /* ── Drawer panel ── */
+    #drawer {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 1rem;
+      max-height: calc(100vh - 2rem);
+    }
+
+    #drawer.open { transform: translateX(0); }
+
+    .drawer-header { display: none; }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1rem .75rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .drawer-header-title {
+      font-size: .9rem;
+      font-weight: 600;
+    }
+
+    #drawer-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+    }
+
+    #drawer-close:hover { background: var(--border); color: var(--text); }
+
+    .drawer-section {
+      padding: .75rem 0 .25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .drawer-section:last-child { border-bottom: none; }
+
+    .drawer-section-title {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: 0 1rem .5rem;
+    }
+
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      width: 100%;
+      padding: .7rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      font-weight: 500;
+      text-align: left;
+      transition: background .12s;
+      text-decoration: none;
+    }
+
+    .drawer-item:hover { background: var(--surface2); }
+
+    .drawer-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .drawer-item-label { flex: 1; }
+
+    .drawer-check {
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+    }
+
+    .drawer-item.view-active {
+      background: rgba(99,102,241,.12);
+      color: var(--accent-text);
+    }
+
+    .drawer-sub-actions {
+      display: flex;
+      gap: .4rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
     /* ── Responsive ── */
-    @media (max-width: 520px) {
-      .main     { padding: .75rem .75rem 2rem; }
-      .topbar   { padding: .75rem 1rem; }
+    @media (min-width: 640px) {
+      .main          { padding: 0; flex: 1; min-width: 0; }
+      #hamburger     { display: none; }
+      .toggles-wrapper { display: none; }
+      #drawer-overlay { display: none !important; }
+      .drawer-header  { display: none !important; }
+    }
+
+    @media (max-width: 639px) {
+      .layout        { padding: .75rem .75rem 2rem; }
+      .topbar        { padding: .75rem 1rem; }
       .sync-badge span { display: none; }
       .fc .fc-toolbar { padding: .75rem; }
+      #hamburger     { display: flex; }
+      .toggles-wrapper { display: none; }
+
+      #drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 85vw;
+        border-radius: 0;
+        border: none;
+        border-right: 1px solid var(--border);
+        z-index: 201;
+        transform: translateX(-100%);
+        transition: transform .25s cubic-bezier(.16,1,.3,1);
+        max-height: none;
+      }
+
+      #drawer.open { transform: translateX(0); }
+      .drawer-header { display: flex; }
+    }
+
+    @media (max-width: 520px) {
+      .topbar { padding: .75rem 1rem; }
     }
   </style>
 </head>
 <body>
 
+  <div id="drawer-overlay"></div>
+
   <div class="topbar">
     <div class="topbar-left">
+      <button id="hamburger" aria-label="Open menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <div class="topbar-name">First Free Calendars</div>
     </div>
     <div class="topbar-right">
@@ -645,21 +812,29 @@
 
   <div id="status"></div>
 
-  <div class="main">
-    <div class="toggles-wrapper">
-      <div class="toggles-bar">
-        <div class="toggles" id="toggles"></div>
-        <button id="subscribe-trigger" aria-label="Add to your calendar">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-          Subscribe
-        </button>
-      </div>
-      <div class="subscribe-panel" id="subscribe-panel" hidden>
-        <div class="subscribe-panel-heading">Add to your calendar</div>
-        <div id="subscribe-list"></div>
+  <div class="layout">
+    <div id="drawer">
+      <div class="drawer-header">
+        <span class="drawer-header-title">Menu</span>
+        <button id="drawer-close">&#x2715;</button>
       </div>
     </div>
-    <div id="calendar"></div>
+    <div class="main">
+      <div class="toggles-wrapper">
+        <div class="toggles-bar">
+          <div class="toggles" id="toggles"></div>
+          <button id="subscribe-trigger" aria-label="Add to your calendar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+            Subscribe
+          </button>
+        </div>
+        <div class="subscribe-panel" id="subscribe-panel" hidden>
+          <div class="subscribe-panel-heading">Add to your calendar</div>
+          <div id="subscribe-list"></div>
+        </div>
+      </div>
+      <div id="calendar"></div>
+    </div>
   </div>
 
   <div id="modal-overlay" role="dialog" aria-modal="true">
@@ -880,6 +1055,93 @@
       document.getElementById('modal-overlay').classList.remove('open');
     }
 
+    // ─── Drawer ────────────────────────────────────────────────────────────────
+    const ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    let drawerCurrentView = window.innerWidth < 640 ? 'listMonth' : 'dayGridMonth';
+
+    function openDrawer() {
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer-overlay').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+    }
+
+    function buildDrawer() {
+      const drawer = document.getElementById('drawer');
+
+      // ── Section 1: Views ──
+      const viewSection = document.createElement('div');
+      viewSection.className = 'drawer-section';
+      viewSection.innerHTML = '<div class="drawer-section-title">View</div>';
+      [['dayGridMonth', 'Month'], ['timeGridDay', 'Day'], ['listMonth', 'List']].forEach(([viewId, label]) => {
+        const btn = document.createElement('button');
+        btn.className = 'drawer-item' + (drawerCurrentView === viewId ? ' view-active' : '');
+        btn.dataset.viewId = viewId;
+        btn.innerHTML = '<span class="drawer-item-label">' + label + '</span>';
+        btn.addEventListener('click', () => {
+          fcCalendar.changeView(viewId);
+          drawerCurrentView = viewId;
+          document.querySelectorAll('[data-view-id]').forEach(el => el.classList.remove('view-active'));
+          btn.classList.add('view-active');
+          closeDrawer();
+        });
+        viewSection.appendChild(btn);
+      });
+      drawer.appendChild(viewSection);
+
+      // ── Section 2: Calendars ──
+      const calSection = document.createElement('div');
+      calSection.className = 'drawer-section';
+      calSection.innerHTML = '<div class="drawer-section-title">Calendars</div>';
+      CALENDARS.forEach(cal => {
+        const btn = document.createElement('button');
+        btn.className = 'drawer-item';
+        const checkId = 'drawer-check-' + cal.id;
+        btn.innerHTML =
+          '<span class="drawer-dot" style="background:' + cal.color + '"></span>' +
+          '<span class="drawer-item-label">' + cal.name + '</span>' +
+          '<span class="drawer-check" id="' + checkId + '">' + (visible.has(cal.id) ? ICON_CHECK : '') + '</span>';
+        btn.addEventListener('click', () => {
+          if (visible.has(cal.id)) {
+            visible.delete(cal.id);
+            document.getElementById(checkId).innerHTML = '';
+          } else {
+            visible.add(cal.id);
+            document.getElementById(checkId).innerHTML = ICON_CHECK;
+          }
+          refreshEvents();
+        });
+        calSection.appendChild(btn);
+      });
+      drawer.appendChild(calSection);
+
+      // ── Section 3: Subscribe ──
+      const subSection = document.createElement('div');
+      subSection.className = 'drawer-section';
+      subSection.innerHTML = '<div class="drawer-section-title">Subscribe</div>';
+      CALENDARS.forEach(cal => {
+        const webcal = cal.url.replace('https://', 'webcal://');
+        const row = document.createElement('div');
+        row.className = 'drawer-item';
+        row.style.cursor = 'default';
+        row.innerHTML =
+          '<span class="drawer-dot" style="background:' + cal.color + '"></span>' +
+          '<span class="drawer-item-label">' + cal.name + '</span>' +
+          '<div class="drawer-sub-actions">' +
+            (isApple ? '<a href="' + webcal + '" class="sub-btn sub-btn-primary" style="background:' + cal.color + '">Subscribe</a>' : '') +
+            '<button class="sub-btn ' + (isApple ? 'sub-btn-secondary' : 'sub-btn-primary') + '" ' +
+              (!isApple ? 'style="background:' + cal.color + '"' : '') +
+              ' onclick="navigator.clipboard.writeText(\'' + cal.url + '\').then(() => { this.textContent=\'Copied!\'; setTimeout(() => this.textContent=\'Copy link\', 2000); })">Copy link</button>' +
+          '</div>';
+        subSection.appendChild(row);
+      });
+      drawer.appendChild(subSection);
+    }
+
     // ─── Subscribe section ─────────────────────────────────────────────────────
     const isApple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
 
@@ -969,6 +1231,11 @@
 
       buildToggles();
       buildSubscribeSection();
+      buildDrawer();
+
+      document.getElementById('hamburger').addEventListener('click', openDrawer);
+      document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+      document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
 
       const subTrigger = document.getElementById('subscribe-trigger');
       const subPanel   = document.getElementById('subscribe-panel');
@@ -984,18 +1251,22 @@
       });
       subPanel.addEventListener('click', e => e.stopPropagation());
 
+      const isMobile = window.innerWidth < 640;
       fcCalendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
+        initialView:  isMobile ? 'listMonth' : 'dayGridMonth',
+        headerToolbar: isMobile ? {
+          left:   'prev,next',
+          center: 'title',
+          right:  'today'
+        } : {
           left:   'prev,next today',
           center: 'title',
-          right:  'dayGridMonth,timeGridDay,listMonth'
+          right:  ''
         },
         buttonText:       { today: 'Today', month: 'M', day: 'D', list: '\u2261' },
         buttonHints:      { today: 'Go to today', month: 'Month view', day: 'Day view', list: 'List view', prev: 'Previous', next: 'Next' },
         height:           'auto',
         firstDay:         0,
-        initialView:      window.innerWidth < 640 ? 'listMonth' : 'dayGridMonth',
         navLinks:         true,
         dateClick:        info => fcCalendar.changeView('timeGridDay', info.date),
         displayEventTime: false,
