@@ -1316,6 +1316,7 @@
         height:           'auto',
         firstDay:         0,
         navLinks:         true,
+        navLinkDayClick:  date => fcCalendar.changeView('timeGridDay', date),
         dateClick:        info => fcCalendar.changeView('timeGridDay', info.date),
         displayEventTime: false,
         views: {
